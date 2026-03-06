@@ -1,5 +1,17 @@
 # NumPy — pandas — SQL Operations Reference
 
+## Introduction
+
+This document provides a side-by-side reference for performing common data operations using **NumPy**, **pandas**, and **SQL**. The goal is to help learners quickly translate concepts between Python data analysis workflows and relational database queries. Each section demonstrates how the same task—such as filtering rows, aggregating data, or joining tables—is expressed in the three ecosystems.
+
+The document is structured as:
+
+- a **sample dataset** used across examples
+- a **core operations comparison section** for quick reference
+- **appendices** containing best practices and conceptual mappings
+
+
+
 ## Table of contents
 
 - [Sample dataset](#sample-dataset)

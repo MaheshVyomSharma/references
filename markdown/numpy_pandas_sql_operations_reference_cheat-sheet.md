@@ -1,5 +1,17 @@
 # NumPy — pandas — SQL Operations Reference
 
+## Introduction
+
+This document provides a side-by-side reference for performing common data operations using **NumPy**, **pandas**, and **SQL**. The goal is to help learners quickly translate concepts between Python data analysis workflows and relational database queries. Each section demonstrates how the same task—such as filtering rows, aggregating data, or joining tables—is expressed in the three ecosystems.
+
+The document is structured as:
+
+- a **sample dataset** used across examples
+- a **core operations comparison section** for quick reference
+- **appendices** containing best practices and conceptual mappings
+
+
+
 ## Table of contents
 
 - [Sample dataset](#sample-dataset)
@@ -65,7 +77,7 @@
 
 ---
 
-## Quick comparison cheat sheet
+## Core operations — NumPy / pandas / SQL comparison
 
 This section compresses the core operations into side‑by‑side comparisons for fast exam revision.
 
@@ -148,9 +160,10 @@ This section compresses the core operations into side‑by‑side comparisons fo
 
 ### Wide ↔ Long reshape
 
-| Transformation | pandas | SQL | NumPy |
+| Transformation | NumPy | pandas | SQL |
 |---|---|---|---|
-| Wide → Long | `pd.melt()` | `UNION ALL` or `UNPIVOT` | manual reconstruction |
+| Wide → Long | manual reconstruction | `pd.melt()` | `UNION ALL` or `UNPIVOT` |
+| Long → Wide | manual reconstruction | `pivot()` | `CASE + GROUP BY` |
 | Long → Wide | `pivot()` | `CASE + GROUP BY` | manual reconstruction |
 
 ---
@@ -176,6 +189,12 @@ This section compresses the core operations into side‑by‑side comparisons fo
 | NumPy | pandas | SQL |
 |---|---|---|
 | `np.char.upper()` | `.str.upper()` | `UPPER(column)` |
+
+---
+
+## Summary
+
+Although **NumPy**, **pandas**, and **SQL** operate in different environments, they share many conceptual similarities when working with tabular data. NumPy focuses on efficient numerical arrays, pandas provides powerful data manipulation tools for analysis, and SQL offers declarative querying for relational databases. Understanding how common operations map across these systems allows practitioners to move more easily between data science workflows and database querying.
 
 ---
 
