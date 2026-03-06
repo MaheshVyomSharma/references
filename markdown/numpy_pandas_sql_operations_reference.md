@@ -13,6 +13,10 @@
 - [Merge / Join tables](#merge--join-tables)
 - [Handling missing values](#handling-missing-values)
 - [Creating derived / new columns](#creating-derived--new-columns)
+- [Wide ↔ Long format conversion](#wide--long-format-conversion)
+- [Handling duplicates](#handling-duplicates)
+- [Type conversion](#type-conversion)
+- [String operations](#string-operations)
 
 ---
 
@@ -626,4 +630,186 @@ FROM employees;
 - **NumPy:** shape becomes `(5, 6)` after stacking new column
 - **pandas:** DataFrame becomes `5 rows × 6 columns`
 - **SQL:** result set includes the computed column but does not modify the base table
+
+---
+
+## Wide ↔ Long format conversion
+
+### Mental note
+- **NumPy:** no dedicated reshape utilities for tabular pivoting; requires manual restructuring.
+- **pandas:** built-in tools like `melt()` and `pivot()` handle this cleanly.
+- **SQL:** can approximate using `UNPIVOT`, `PIVOT`, or `CASE` depending on the database.
+
+### Example wide dataset (salary by year)
+
+| emp_id | salary_2022 | salary_2023 |
+|---|---|---|
+| 101 | 58000 | 60000 |
+| 102 | 72000 | 75000 |
+| 103 | 65000 | 68000 |
+
+---
+
+### Wide → Long
+
+Transform yearly salary columns into rows.
+
+#### NumPy
+```python
+# Conceptual approach: manually rebuild rows
+rows = []
+for r in wide_np:
+    rows.append([r[0], "2022", r[1]])
+    rows.append([r[0], "2023", r[2]])
+
+np.array(rows, dtype=object)
+```
+
+*(Requires manual restructuring logic.)*
+
+#### pandas
+```python
+pd.melt(
+    salary_wide_pd,
+    id_vars="emp_id",
+    var_name="year",
+    value_name="salary"
+)
+```
+
+#### SQL
+```sql
+SELECT emp_id, '2022' AS year, salary_2022 AS salary FROM salary_table
+UNION ALL
+SELECT emp_id, '2023' AS year, salary_2023 AS salary FROM salary_table;
+```
+
+### Shape note
+- **NumPy:** rows increase because columns are converted into rows.
+- **pandas:** `melt()` expands rows accordingly.
+- **SQL:** `UNION` or `UNPIVOT` produces the long format.
+
+---
+
+### Long → Wide
+
+Convert row-based years back into columns.
+
+#### NumPy
+```python
+# Requires custom grouping and reconstruction logic
+```
+
+#### pandas
+```python
+salary_long_pd.pivot(
+    index="emp_id",
+    columns="year",
+    values="salary"
+)
+```
+
+#### SQL
+```sql
+SELECT emp_id,
+MAX(CASE WHEN year='2022' THEN salary END) AS salary_2022,
+MAX(CASE WHEN year='2023' THEN salary END) AS salary_2023
+FROM salary_long
+GROUP BY emp_id;
+```
+
+### Mental takeaway
+- **NumPy:** awkward for reshaping relational-style datasets.
+- **pandas:** designed for this with `melt`, `pivot`, and `pivot_table`.
+- **SQL:** possible but verbose without dedicated `PIVOT/UNPIVOT` support.
+
+---
+
+## Handling duplicates
+
+### Mental note
+- **NumPy:** requires manual comparison or use of helper functions like `np.unique()`.
+- **pandas:** provides `drop_duplicates()` and `duplicated()`.
+- **SQL:** uses `DISTINCT` or grouping to remove duplicate rows.
+
+### Remove duplicate rows
+
+#### NumPy
+```python
+np.unique(employees_np, axis=0)
+```
+
+#### pandas
+```python
+employees_pd.drop_duplicates()
+```
+
+#### SQL
+```sql
+SELECT DISTINCT *
+FROM employees;
+```
+
+### Shape note
+Removing duplicates may reduce the number of rows.
+
+---
+
+## Type conversion
+
+### Mental note
+- **NumPy:** uses `astype()` for array type casting.
+- **pandas:** also uses `astype()` but can operate on individual columns.
+- **SQL:** uses `CAST()` or `CONVERT()` depending on the database.
+
+### Convert salary to integer
+
+#### NumPy
+```python
+employees_np[:,4].astype(int)
+```
+
+#### pandas
+```python
+employees_pd["salary"].astype(int)
+```
+
+#### SQL
+```sql
+SELECT CAST(salary AS INT)
+FROM employees;
+```
+
+### Shape note
+Type conversion does not change the dataset shape.
+
+---
+
+## String operations
+
+### Mental note
+- **NumPy:** limited string processing utilities.
+- **pandas:** powerful vectorized string methods via `.str`.
+- **SQL:** uses built-in string functions.
+
+### Convert employee names to uppercase
+
+#### NumPy
+```python
+np.char.upper(employees_np[:,1])
+```
+
+#### pandas
+```python
+employees_pd["name"].str.upper()
+```
+
+#### SQL
+```sql
+SELECT UPPER(name)
+FROM employees;
+```
+
+### Shape note
+String transformations modify values but do not change dataset shape.
 
