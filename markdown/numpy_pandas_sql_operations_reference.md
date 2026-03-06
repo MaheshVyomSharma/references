@@ -17,6 +17,9 @@
 - [Handling duplicates](#handling-duplicates)
 - [Type conversion](#type-conversion)
 - [String operations](#string-operations)
+- [Appendix A — Best practices](#appendix-a--best-practices)
+- [Appendix B — Concept mapping](#appendix-b--concept-mapping)
+- [Appendix C — SQL caveats](#appendix-c--sql-caveats)
 
 ---
 
@@ -812,4 +815,75 @@ FROM employees;
 
 ### Shape note
 String transformations modify values but do not change dataset shape.
+
+---
+
+## Appendix A — Best practices
+
+### pandas row and column selection
+
+Simplified example used earlier:
+
+```python
+employees_pd.iloc[1:4][["name","salary"]]
+```
+
+Preferred approach:
+
+```python
+employees_pd.loc[1:3, ["name","salary"]]
+```
+
+Reason:
+- avoids chained indexing
+- clearer semantics
+
+---
+
+### NumPy sorting with argsort
+
+```python
+employees_np[np.argsort(employees_np[:,4])]
+```
+
+Explanation:
+- `argsort()` returns the index order of sorted values
+- allows row-wise reordering
+
+---
+
+### SQL row ordering
+
+SQL tables have **no guaranteed row order**.
+
+Correct pattern:
+
+```sql
+SELECT *
+FROM employees
+ORDER BY salary;
+```
+
+---
+
+## Appendix B — Concept mapping
+
+| Concept | NumPy | pandas | SQL |
+|---|---|---|---|
+| Table | 2D array | DataFrame | Table |
+| Column | array slice | Series | Column |
+| Row | array row | row | row |
+| Index / identity | position | index | primary key |
+
+---
+
+## Appendix C — SQL caveats
+
+Some SQL features depend on the database vendor.
+
+| Feature | ANSI SQL | Vendor specific |
+|---|---|---|
+| PIVOT | not standard | SQL Server / Oracle |
+| LIMIT | MySQL/Postgres | not ANSI |
+| TOP | SQL Server | not portable |
 
